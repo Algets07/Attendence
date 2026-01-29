@@ -348,40 +348,61 @@ def send_absent_alert_email(student, date):
     except Exception as e:
         print("Absent Mail Error:", e)
 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.timezone import now
+from .models import Student, Attendance
+from django.conf import settings
+
 def send_daily_attendance_report():
-    try:
-        today = datetime.date.today()
-        stats = get_attendance_stats(today)
+    date = now().date()
 
-        subject = f"Daily Attendance Report | {today}"
+    # PRESENT STUDENTS
+    present_list = Attendance.objects.filter(
+        date=date,
+        status="Present"
+    ).select_related("student")
 
-        html_content = render_to_string(
-            "emails/daily_report_mail.html",
-            {
-                "stats": stats,
-                "date": today,
-                "year": now().year,
-            }
+    present_student_ids = present_list.values_list("student_id", flat=True)
+
+    # ABSENT STUDENTS
+    absent_list = Student.objects.filter(
+        is_active=True
+    ).exclude(id__in=present_student_ids)
+
+    # SUMMARY STATS
+    stats = {
+        "total_students": Student.objects.filter(is_active=True).count(),
+        "present": present_list.count(),
+        "absent": absent_list.count(),
+        "attendance_percentage": (
+            (present_list.count() /
+             Student.objects.filter(is_active=True).count()) * 100
+            if Student.objects.filter(is_active=True).exists() else 0
         )
+    }
 
-        text_content = (
-            f"Total: {stats['total_students']}, "
-            f"Present: {stats['present']}, "
-            f"Absent: {stats['absent']}"
-        )
+    html_content = render_to_string(
+        "emails/daily_report_mail.html",
+        {
+            "date": date.strftime("%B %d, %Y"),
+            "stats": stats,
+            "present_list": present_list,
+            "absent_list": absent_list,
+            "year": now().year
+        }
+    )
 
-        email = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[settings.DEPARTMENT_EMAIL],
-        )
+    email = EmailMultiAlternatives(
+        subject=f"Daily Attendance Report | {date}",
+        body="Daily attendance report attached.",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[settings.DEPARTMENT_EMAIL],
+    )
 
-        email.attach_alternative(html_content, "text/html")
-        email.send()
+    email.attach_alternative(html_content, "text/html")
+    email.send()
 
-    except Exception as e:
-        print("Daily Report Mail Error:", e)
 
 # from django.conf import settings
 # from datetime import datetime

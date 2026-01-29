@@ -4,85 +4,95 @@
     <meta charset="UTF-8">
     <title>Daily Attendance Report</title>
 </head>
-<body style="
-    margin:0;
-    padding:0;
-    background-color:#f1f4f8;
-    font-family: 'Segoe UI', Arial, sans-serif;
-">
+<body style="margin:0; padding:0; background:#f1f4f8; font-family:'Segoe UI', Arial, sans-serif;">
 
-<div style="
-    max-width:640px;
-    margin:40px auto;
-    background:#ffffff;
-    border-radius:8px;
-    overflow:hidden;
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
-">
+<div style="max-width:700px; margin:40px auto; background:#ffffff; border-radius:8px;
+            box-shadow:0 6px 18px rgba(0,0,0,0.08); overflow:hidden;">
 
     <!-- Header -->
-    <div style="
-        background:#1f3a5f;
-        color:#ffffff;
-        padding:18px 28px;
-    ">
-        <h2 style="margin:0; font-size:20px; font-weight:600;">
-            Daily Attendance Summary
-        </h2>
+    <div style="background:#1f3a5f; color:#ffffff; padding:18px 28px;">
+        <h2 style="margin:0; font-size:20px;">Daily Attendance Report</h2>
     </div>
 
     <!-- Content -->
-    <div style="padding:28px; color:#1f2937; font-size:14px;">
-        <p style="margin-top:0;">
-            Dear Department,
-        </p>
+    <div style="padding:28px; font-size:14px; color:#1f2937;">
+        <p>Dear Department,</p>
 
         <p>
-            Please find below the attendance summary generated for the date mentioned.
-            This report provides an overview of student presence recorded through the
-            Face Recognition Attendance System.
+            Below is the daily attendance summary and detailed student-wise
+            attendance information recorded through the Face Recognition
+            Attendance System.
         </p>
 
-        <!-- Date -->
-        <p style="margin:20px 0 10px;">
-            <strong>Date:</strong> {{ date }}
-        </p>
+        <p><strong>Date:</strong> {{ date }}</p>
 
-        <!-- Table -->
-        <table width="100%" cellpadding="10" cellspacing="0" style="
-            border-collapse:collapse;
-            margin-top:10px;
-            background:#f9fafb;
-            border-radius:6px;
-            overflow:hidden;
-        ">
+        <!-- SUMMARY TABLE -->
+        <h3 style="margin-top:30px;">Attendance Summary</h3>
+        <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;">
             <tr style="background:#e5e7eb;">
                 <th align="left">Total Students</th>
                 <th align="left">Present</th>
                 <th align="left">Absent</th>
-                <th align="left">Attendance %</th>
             </tr>
-            <tr style="background:#ffffff;">
+            <tr>
                 <td>{{ stats.total_students }}</td>
                 <td>{{ stats.present }}</td>
                 <td>{{ stats.absent }}</td>
-                <td>{{ stats.attendance_percentage|floatformat:2 }}%</td>
             </tr>
         </table>
 
-        <p style="margin-top:24px;">
+        <!-- PRESENT STUDENTS -->
+        <h3 style="margin-top:35px; color:#047857;">Present Students</h3>
+        <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
+            <tr style="background:#ecfdf5;">
+                <th align="left">s.no</th>
+                <th align="left">Name</th>
+                <th align="left">Enrollment No</th>
+                <th align="left">Time</th>
+            </tr>
+            {% for a in present_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ a.student.name }}</td>
+                <td>{{ a.student.enrollment_number }}</td>
+                <td>{{ a.time }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No students marked present.</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- ABSENT STUDENTS -->
+        <h3 style="margin-top:35px; color:#b45309;">Absent Students</h3>
+        <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
+            <tr style="background:#fff7ed;">
+                <th align="left">s.no</th>
+                <th align="left">Name</th>
+                <th align="left">Enrollment No</th>
+            </tr>
+            {% for s in absent_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.enrollment_number }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No absentees.</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <p style="margin-top:30px;">
             This is a system-generated report and does not require manual verification.
         </p>
     </div>
 
     <!-- Footer -->
-    <div style="
-        background:#f1f5f9;
-        padding:14px 28px;
-        font-size:12px;
-        color:#6b7280;
-        text-align:center;
-    ">
+    <div style="background:#f1f5f9; padding:14px 28px; font-size:12px;
+                color:#6b7280; text-align:center;">
         © {{ year }} Face Recognition Attendance System<br>
         Automated Daily Report
     </div>
