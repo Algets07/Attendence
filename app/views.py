@@ -149,10 +149,6 @@ def attendance_list(request):
 def home(request):
     return render(request, "home.html")
 
-from .utils import send_absent_alert_email
-
-
-
 @require_http_methods(["POST"])
 def mark_absent_today_api(request):
     today = datetime.date.today()
@@ -169,7 +165,6 @@ def mark_absent_today_api(request):
                 confidence=None,
             )
             created += 1
-    send_absent_alert_email(student, today)
 
     stats = get_attendance_stats(today)
     return JsonResponse(

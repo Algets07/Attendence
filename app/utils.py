@@ -7,51 +7,40 @@ from PIL import Image
 import io
 from .models import Student, Attendance
 import datetime
-from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.utils.timezone import now
+
 
 
 def process_face_image_from_base64(image_data):
-    """
-    Process base64 encoded image and extract face encoding.
-    Uses the best face recognition algorithm with HOG model for detection.
-    """
     try:
-        # Remove data URL prefix if present
         if ',' in image_data:
             image_data = image_data.split(',')[1]
         
-        # Decode base64 image
         image_bytes = base64.b64decode(image_data)
         image = Image.open(io.BytesIO(image_bytes))
         
-        # Convert image to RGB if it's not already (handles RGBA, L, P, etc.)
         if image.mode != 'RGB':
-            # Convert to RGB, removing alpha channel if present
             rgb_image_pil = image.convert('RGB')
         else:
             rgb_image_pil = image
         
-        # Convert PIL image to numpy array (RGB) - ensure uint8
         rgb_image = np.array(rgb_image_pil, dtype=np.uint8)
         
-        # Ensure it's a 3-channel RGB image
         if len(rgb_image.shape) != 3:
             return None, "Invalid image format. Image must be a color image (3 channels)."
         
         if rgb_image.shape[2] != 3:
             return None, f"Invalid image format. Expected 3 channels, got {rgb_image.shape[2]}."
         
-        # Ensure image is contiguous in memory (required by face_recognition)
         if not rgb_image.flags['C_CONTIGUOUS']:
             rgb_image = np.ascontiguousarray(rgb_image, dtype=np.uint8)
         
-        # Final validation: ensure dtype is uint8
         if rgb_image.dtype != np.uint8:
             rgb_image = rgb_image.astype(np.uint8)
         
-        # Use HOG model for face detection (faster and good accuracy)
         face_locations = face_recognition.face_locations(rgb_image, model='hog')
         
         if not face_locations:
@@ -60,13 +49,11 @@ def process_face_image_from_base64(image_data):
         if len(face_locations) > 1:
             return None, "Multiple faces detected. Please ensure only one person is in the frame."
         
-        # Extract face encoding using the best model
         face_encodings = face_recognition.face_encodings(rgb_image, face_locations, num_jitters=1, model='large')
         
         if not face_encodings:
             return None, "Could not generate face encoding. Please try again."
         
-        # Convert to JSON string for storage
         encoding_list = face_encodings[0].tolist()
         encoding_json = json.dumps(encoding_list)
         
@@ -77,10 +64,6 @@ def process_face_image_from_base64(image_data):
 
 
 def capture_face_from_webcam():
-    """
-    Capture face from webcam using OpenCV.
-    Returns face encoding as JSON string or None if failed.
-    """
     video_capture = cv2.VideoCapture(0)
     
     if not video_capture.isOpened():
@@ -97,13 +80,10 @@ def capture_face_from_webcam():
             error = "Failed to read from webcam"
             break
         
-        # Convert BGR to RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
-        # Detect faces using HOG model
         face_locations = face_recognition.face_locations(rgb_frame, model='hog')
         
-        # Draw rectangle around face
         for (top, right, bottom, left) in face_locations:
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
             cv2.putText(frame, "Face Detected - Press SPACE", (left, top - 10),
@@ -113,7 +93,7 @@ def capture_face_from_webcam():
         
         key = cv2.waitKey(1) & 0xFF
         
-        if key == ord(' '):  # Spacebar to capture
+        if key == ord(' '): 
             if face_locations:
                 face_encodings = face_recognition.face_encodings(
                     rgb_frame, face_locations, num_jitters=1, model='large'
@@ -128,7 +108,7 @@ def capture_face_from_webcam():
             else:
                 error = "No face detected. Please position your face in the frame."
         
-        elif key == ord('q'):  # Q to quit
+        elif key == ord('q'):  
             error = "Capture cancelled"
             break
     
@@ -139,18 +119,6 @@ def capture_face_from_webcam():
 
 
 def recognize_face_and_mark_attendance(image_data=None, video_capture=None):
-    """
-    Recognize face and mark attendance.
-    Attendance is allowed only before closing time.
-    """
-
-    # # 🔒 ATTENDANCE TIME CHECK (NEW)
-    # from .utils import is_attendance_open
-
-    # if not is_attendance_open():
-    #     return None, None, "Attendance is closed for today"
-
-    # Load all active students
     students = Student.objects.filter(is_active=True)
 
     if not students.exists():
@@ -168,7 +136,6 @@ def recognize_face_and_mark_attendance(image_data=None, video_capture=None):
     if not known_face_encodings:
         return None, None, "No valid face encodings found in database"
 
-    # ---------------- IMAGE PROCESSING ----------------
     if image_data:
         try:
             if ',' in image_data:
@@ -200,7 +167,6 @@ def recognize_face_and_mark_attendance(image_data=None, video_capture=None):
     else:
         return None, None, "No image source provided"
 
-    # ---------------- FACE DETECTION ----------------
     face_locations = face_recognition.face_locations(rgb_image, model='hog')
 
     if not face_locations:
@@ -218,7 +184,6 @@ def recognize_face_and_mark_attendance(image_data=None, video_capture=None):
 
     face_encoding = face_encodings[0]
 
-    # ---------------- MATCHING ----------------
     face_distances = face_recognition.face_distance(
         known_face_encodings, face_encoding
     )
@@ -239,7 +204,6 @@ def recognize_face_and_mark_attendance(image_data=None, video_capture=None):
     if Attendance.objects.filter(student=matched_student, date=today).exists():
         return matched_student, confidence, "Attendance already marked today"
 
-    # ---------------- MARK ATTENDANCE ----------------
     try:
         attendance = Attendance.objects.create(
             student=matched_student,
@@ -273,10 +237,6 @@ def get_attendance_stats(date=None):
             (present_count / total_students) * 100 if total_students > 0 else 0
         )
     }
-
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-
 
 def send_attendance_email(student, attendance):
     try:
@@ -316,48 +276,10 @@ def send_attendance_email(student, attendance):
     except Exception as e:
         print("Email Error:", e)
 
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.timezone import now
-
-def send_absent_alert_email(student, date):
-    try:
-        subject = "Absent Alert | Face Attendance System"
-
-        html_content = render_to_string(
-            "emails/absent_alert_mail.html",
-            {
-                "student": student,
-                "date": date,
-                "year": now().year,
-            }
-        )
-
-        text_content = f"You were marked ABSENT on {date}"
-
-        email = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[settings.DEPARTMENT_EMAIL],
-        )
-
-        email.attach_alternative(html_content, "text/html")
-        email.send()
-
-    except Exception as e:
-        print("Absent Mail Error:", e)
-
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.timezone import now
-from .models import Student, Attendance
-from django.conf import settings
 
 def send_daily_attendance_report():
     date = now().date()
 
-    # PRESENT STUDENTS
     present_list = Attendance.objects.filter(
         date=date,
         status="Present"
@@ -365,12 +287,10 @@ def send_daily_attendance_report():
 
     present_student_ids = present_list.values_list("student_id", flat=True)
 
-    # ABSENT STUDENTS
     absent_list = Student.objects.filter(
         is_active=True
     ).exclude(id__in=present_student_ids)
 
-    # SUMMARY STATS
     stats = {
         "total_students": Student.objects.filter(is_active=True).count(),
         "present": present_list.count(),
@@ -402,19 +322,3 @@ def send_daily_attendance_report():
 
     email.attach_alternative(html_content, "text/html")
     email.send()
-
-
-# from django.conf import settings
-# from datetime import datetime
-
-# def is_attendance_open():
-#     """
-#     Returns True if attendance is still open, else False
-#     """
-#     closing_time = datetime.strptime(
-#         settings.ATTENDANCE_CLOSING_TIME, "%H:%M"
-#     ).time()
-
-#     current_time = datetime.now().time()
-
-#     return current_time <= closing_time
