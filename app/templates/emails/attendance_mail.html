@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #eef1f5;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 620px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #ffffff;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 30px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .content p {
+            margin: 0 0 16px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #f7f9fc;
+            border-left: 4px solid #2a5298;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        td {
+            padding: 10px 6px;
+            font-size: 14px;
+        }
+
+        td.label {
+            color: #6b7280;
+            width: 45%;
+        }
+
+        td.value {
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #e6f7ee;
+            color: #047857;
+            font-weight: 600;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .footer {
+            background: #f1f5f9;
+            padding: 16px 30px;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Attendance Confirmation</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear Department,</p>
+
+        <p>
+            This is to inform you that a student's attendance has been successfully
+            recorded through the Face Recognition Attendance System.
+        </p>
+
+        <div class="info-box">
+            <table>
+                <tr>
+                    <td class="label">Student Name</td>
+                    <td class="value">{{ student.name }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Enrollment Number</td>
+                    <td class="value">{{ student.enrollment_number }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Date</td>
+                    <td class="value">{{ attendance.date }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Time</td>
+                    <td class="value">{{ attendance.time }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Attendance Status</td>
+                    <td class="value">
+                        <span class="status">{{ attendance.status }}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            This record has been generated automatically and does not require
+            manual verification.
+        </p>
+    </div>
+
+    <div class="footer">
+        © {{ year }} Face Recognition Attendance System • System Generated Notification
+    </div>
+
+</div>
+
+</body>
+</html>

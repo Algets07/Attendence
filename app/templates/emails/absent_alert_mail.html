@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Absent Alert</title>
+</head>
+<body style="font-family: Arial; background:#fff3f3; padding:20px;">
+    <div style="max-width:600px; margin:auto; background:#ffffff; padding:20px; border-radius:8px;">
+        <h2 style="color:#c0392b;">Absent Alert ⚠️</h2>
+
+        <p>Hello <strong>{{ student.name }}</strong>,</p>
+
+        <p>You were marked <b>ABSENT</b> today as your face was not detected.</p>
+
+        <table>
+            <tr><td><b>Enrollment:</b></td><td>{{ student.enrollment_number }}</td></tr>
+            <tr><td><b>Date:</b></td><td>{{ date }}</td></tr>
+            <tr><td><b>Status:</b></td><td>Absent</td></tr>
+        </table>
+
+        <p style="margin-top:20px;">
+            If this is incorrect, please contact the department immediately.
+        </p>
+
+        <p style="font-size:12px; color:#777;">
+            © {{ year }} Face Attendance System
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Attendance Report</title>
+</head>
+<body style="
+    margin:0;
+    padding:0;
+    background-color:#f1f4f8;
+    font-family: 'Segoe UI', Arial, sans-serif;
+">
+
+<div style="
+    max-width:640px;
+    margin:40px auto;
+    background:#ffffff;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+">
+
+    <!-- Header -->
+    <div style="
+        background:#1f3a5f;
+        color:#ffffff;
+        padding:18px 28px;
+    ">
+        <h2 style="margin:0; font-size:20px; font-weight:600;">
+            Daily Attendance Summary
+        </h2>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:28px; color:#1f2937; font-size:14px;">
+        <p style="margin-top:0;">
+            Dear Department,
+        </p>
+
+        <p>
+            Please find below the attendance summary generated for the date mentioned.
+            This report provides an overview of student presence recorded through the
+            Face Recognition Attendance System.
+        </p>
+
+        <!-- Date -->
+        <p style="margin:20px 0 10px;">
+            <strong>Date:</strong> {{ date }}
+        </p>
+
+        <!-- Table -->
+        <table width="100%" cellpadding="10" cellspacing="0" style="
+            border-collapse:collapse;
+            margin-top:10px;
+            background:#f9fafb;
+            border-radius:6px;
+            overflow:hidden;
+        ">
+            <tr style="background:#e5e7eb;">
+                <th align="left">Total Students</th>
+                <th align="left">Present</th>
+                <th align="left">Absent</th>
+                <th align="left">Attendance %</th>
+            </tr>
+            <tr style="background:#ffffff;">
+                <td>{{ stats.total_students }}</td>
+                <td>{{ stats.present }}</td>
+                <td>{{ stats.absent }}</td>
+                <td>{{ stats.attendance_percentage|floatformat:2 }}%</td>
+            </tr>
+        </table>
+
+        <p style="margin-top:24px;">
+            This is a system-generated report and does not require manual verification.
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="
+        background:#f1f5f9;
+        padding:14px 28px;
+        font-size:12px;
+        color:#6b7280;
+        text-align:center;
+    ">
+        © {{ year }} Face Recognition Attendance System<br>
+        Automated Daily Report
+    </div>
+
+</div>
+
+</body>
+</html>

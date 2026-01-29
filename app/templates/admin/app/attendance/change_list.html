@@ -1,0 +1,95 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block content %}
+  <div style="margin-bottom: 16px;">
+    <div style="display:flex; gap:16px; align-items:stretch; flex-wrap:wrap;">
+      <div style="flex:1 1 420px; min-width:320px; background:#2cc5da; border:1px solid #e5e7eb; border-radius:10px; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <h2 style="color:#2d19e4;margin:0 0 4px 0;">Attendance Summary</h2>
+            <div style="color:#080808; font-size:13px;">
+              Date: <strong>{{ attendance_chart_date }}</strong> |
+              Total: <strong>{{ attendance_total }}</strong>
+            </div>
+          </div>
+          <form method="post" action="{{ reset_today_url }}" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit"
+                    class="button "
+                    style="background:#dc2626; border-color:#dc2626; color:#fff;padding: 20px;font-size:18px;"
+                    onclick="return confirm('Reset today attendance? This will delete ALL records for today.');">
+              Reset Today
+            </button>
+          </form>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
+          <div style="color:#080808;background:#26a168; border:1px solid #14cf78; padding:10px 12px; border-radius:10px;">
+            Present: <strong>{{ attendance_present }}</strong>
+          </div>
+          <div style="color:#080808;background:#c42f15; border:1px solid #a7380c; padding:10px 12px; border-radius:10px;">
+            Absent: <strong>{{ attendance_absent }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:1 1 420px; min-width:320px; background:#dfdc46; border:1px solid #e5e7eb; border-radius:10px; padding:16px;">
+        <h3 style="color:#080808;margin:0 0 12px 0;">Pie Chart (Present vs Absent)</h3>
+        <div style="height:280px;">
+          <canvas id="attendancePie"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+  <script>
+    (function () {
+      const el = document.getElementById('attendancePie');
+      if (!el || !window.Chart) return;
+
+      const present = Number('{{ attendance_present|default:0 }}');
+      const absent = Number('{{ attendance_absent|default:0 }}');
+
+      new Chart(el, {
+        type: 'pie',
+        data: {
+          labels: ['Present', 'Absent'],
+          datasets: [{
+            data: [present, absent],
+            backgroundColor: ['#22c55e', '#f97316'],
+            borderColor: ['#16a34a', '#ea580c'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  const total = present + absent;
+                  const value = ctx.raw || 0;
+                  const pct = total ? ((value / total) * 100).toFixed(1) : '0.0';
+                  return `${ctx.label}: ${value} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    })();
+  </script>
+{% endblock %}
