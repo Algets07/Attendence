@@ -4,6 +4,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 import datetime
+from calendar import monthrange
+from datetime import date as date_class
+from app.utils import get_attendance_stats, is_attendance_closed
+from django.conf import settings
 from .models import Student, Attendance
 from .forms import StudentForm
 from .utils import process_face_image_from_base64, recognize_face_and_mark_attendance, get_attendance_stats
@@ -165,8 +169,6 @@ def attendance_list(request):
     return render(request, 'attendance_list.html', context)
 
 
-from app.utils import get_attendance_stats, is_attendance_closed
-from django.conf import settings
 def home(request):
     stats = get_attendance_stats()
     attendance_closed = is_attendance_closed()
@@ -264,7 +266,7 @@ def download_daily_report(request):
     )
     return response
 
-from calendar import monthrange
+
 
 
 def download_monthly_summary_report(request, year, month):
@@ -307,7 +309,6 @@ def download_monthly_summary_report(request, year, month):
     )
     return response
 
-from datetime import date as date_class
 
 def download_datewise_report(request, year, month, day):
     selected_date = date_class(year, month, day)

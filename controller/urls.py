@@ -31,8 +31,8 @@ urlpatterns = [
     path('api/reset-attendance-today/', reset_attendance_today_api, name='reset_attendance_today_api'),
     path('attendance-list/', attendance_list, name='attendance_list'),
     path("send-daily-report/", send_daily_report_api,name='daily'),
-     path("download/daily/", download_daily_report, name="download_daily"),
-     path("download/monthly-summary/<int:year>/<int:month>/",download_monthly_summary_report,name="download_monthly_summary"),
+    path("download/daily/", download_daily_report, name="download_daily"),
+    path("download/monthly-summary/<int:year>/<int:month>/",download_monthly_summary_report,name="download_monthly_summary"),
     path("download/datewise/<int:year>/<int:month>/<int:day>/",download_datewise_report,name="download_datewise_report"),
 
 

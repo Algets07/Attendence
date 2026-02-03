@@ -122,7 +122,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -131,7 +130,6 @@ EMAIL_HOST_USER = 'teramediainfo@gmail.com'
 EMAIL_HOST_PASSWORD = 'hgqnkearalskvkah'
 DEFAULT_FROM_EMAIL = 'teramediainfo@gmail.com'
 
-# Department email for attendance notifications
 DEPARTMENT_EMAIL = 'algetss223@gmail.com'
 
 from datetime import time

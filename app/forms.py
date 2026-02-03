@@ -22,7 +22,6 @@ class StudentForm(forms.ModelForm):
             'enrollment_number': 'Enrollment Number'
         }
 
-    # Add the hidden field for captured image
     captured_image = forms.CharField(widget=forms.HiddenInput(), required=False)
     
     def clean_enrollment_number(self):

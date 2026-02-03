@@ -2,12 +2,12 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import json
 
-# Create your models here.
+
 
 class Student(models.Model):
     name = models.CharField(max_length=100)
     enrollment_number = models.CharField(max_length=20, unique=True)
-    face_encoding = models.TextField()  # Store face encoding as JSON string
+    face_encoding = models.TextField()  
     registered_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
@@ -32,7 +32,7 @@ class Attendance(models.Model):
     confidence = models.FloatField(null=True, blank=True, help_text="Face recognition confidence score")
 
     class Meta:
-        unique_together = ['student', 'date']  # Prevent duplicate attendance for same day
+        unique_together = ['student', 'date']  
         ordering = ['-date', '-time']
 
     def __str__(self):

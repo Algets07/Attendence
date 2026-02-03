@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Student Face Registration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
@@ -23,7 +22,8 @@
             border-radius: 20px;
         }
 
-        video, canvas {
+        video,
+        canvas {
             border-radius: 16px;
         }
 
@@ -32,7 +32,8 @@
             top: 0;
             left: 0;
         }
-        #hi{
+
+        #hi {
             font-size: x-large;
             background-color: white;
         }
@@ -41,129 +42,119 @@
 
 <body class="d-flex align-items-center justify-content-center text-white">
 
-<div class="container">
+    <div class="container">
 
 
-    <div class="card glass shadow-lg border-0">
-        <div class="card-body p-4">
-                        <a href="{% url 'home' %}" id="hi" class="btn btn-light btn-sm">←</a>
+        <div class="card glass shadow-lg border-0">
+            <div class="card-body p-4">
+                <a href="{% url 'home' %}" id="hi" class="btn btn-light btn-sm">←</a>
 
-            <h3 class="text-center fw-bold mb-4">
+                <h3 class="text-center fw-bold mb-4">
 
-                <i class="bi bi-person-bounding-box"></i>
-                Student Face Registration
-            </h3>
+                    <i class="bi bi-person-bounding-box"></i>
+                    Student Face Registration
+                </h3>
 
-            {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-            {% endif %}
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
 
-            <form method="POST">
-                {% csrf_token %}
+                <form method="POST">
+                    {% csrf_token %}
 
-                <div class="row g-4">
+                    <div class="row g-4">
 
-                    <!-- LEFT -->
-                    <div class="col-md-5">
-                        <div class="card h-100 shadow border-0">
-                            <div class="card-body">
+                        <div class="col-md-5">
+                            <div class="card h-100 shadow border-0">
+                                <div class="card-body">
 
-                                <h6 class="text-primary fw-bold mb-3">
-                                    <i class="bi bi-card-text"></i> Student Details
-                                </h6>
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="bi bi-card-text"></i> Student Details
+                                    </h6>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">
-                                        <i class="bi bi-person"></i> Student Name
-                                    </label>
-                                    {{ form.name }}
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="bi bi-person"></i> Student Name
+                                        </label>
+                                        {{ form.name }}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="bi bi-hash"></i> Enrollment No
+                                        </label>
+                                        {{ form.enrollment_number }}
+                                    </div>
+
+                                    <div class="alert alert-info small mb-0">
+                                        ✔ Use official student details only
+                                    </div>
+
                                 </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">
-                                        <i class="bi bi-hash"></i> Enrollment No
-                                    </label>
-                                    {{ form.enrollment_number }}
-                                </div>
-
-                                <div class="alert alert-info small mb-0">
-                                    ✔ Use official student details only
-                                </div>
-
                             </div>
                         </div>
-                    </div>
 
-                    <!-- RIGHT -->
-                    <div class="col-md-7">
-                        <div class="card bg-dark text-white shadow border-0">
-                            <div class="card-body text-center">
+                        <div class="col-md-7">
+                            <div class="card bg-dark text-white shadow border-0">
+                                <div class="card-body text-center">
 
-                                <h6 class="fw-bold">
-                                    <i class="bi bi-camera-video"></i> Face Capture
-                                </h6>
+                                    <h6 class="fw-bold">
+                                        <i class="bi bi-camera-video"></i> Face Capture
+                                    </h6>
 
-                                <p class="small text-secondary">
-                                    Keep your face centered & well lit
-                                </p>
+                                    <p class="small text-secondary">
+                                        Keep your face centered & well lit
+                                    </p>
 
-                                <div class="position-relative mb-3">
-                                    <video id="videoElement" autoplay class="w-100"></video>
-                                    <canvas id="overlayCanvas" class="w-100 h-100"></canvas>
-                                </div>
+                                    <div class="position-relative mb-3">
+                                        <video id="videoElement" autoplay class="w-100"></video>
+                                        <canvas id="overlayCanvas" class="w-100 h-100"></canvas>
+                                    </div>
 
-                                <div id="faceInfo" class="alert alert-success py-2 d-none">
-                                    Faces detected:
-                                    <span id="faceCount">0</span>
-                                    <div id="faceCoords" class="small"></div>
-                                </div>
+                                    <div id="faceInfo" class="alert alert-success py-2 d-none">
+                                        Faces detected:
+                                        <span id="faceCount">0</span>
+                                        <div id="faceCoords" class="small"></div>
+                                    </div>
 
-                                <div id="status" class="alert d-none"></div>
+                                    <div id="status" class="alert d-none"></div>
 
-                                <div class="d-flex justify-content-center gap-3">
-                                    <button type="button"
-                                            class="btn btn-warning px-4"
-                                            id="captureBtn"
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <button type="button" class="btn btn-warning px-4" id="captureBtn"
                                             onclick="takeSnapshot()">
-                                        <i class="bi bi-camera"></i> Capture
-                                    </button>
+                                            <i class="bi bi-camera"></i> Capture
+                                        </button>
 
-                                    <button type="button"
-                                            class="btn btn-outline-light px-4 d-none"
-                                            id="retryBtn"
+                                        <button type="button" class="btn btn-outline-light px-4 d-none" id="retryBtn"
                                             onclick="startWebcam()">
-                                        <i class="bi bi-arrow-repeat"></i> Retry
-                                    </button>
-                                </div>
+                                            <i class="bi bi-arrow-repeat"></i> Retry
+                                        </button>
+                                    </div>
 
+                                </div>
                             </div>
                         </div>
+
                     </div>
 
-                </div>
+                    {{ form.captured_image }}
 
-                {{ form.captured_image }}
-
-                <div class="d-grid mt-4">
-                    <button type="submit"
-                            class="btn btn-success btn-lg rounded-pill fw-bold"
-                            id="submitBtn"
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold" id="submitBtn"
                             disabled>
-                        <i class="bi bi-check-circle"></i> REGISTER STUDENT
-                    </button>
-                </div>
+                            <i class="bi bi-check-circle"></i> REGISTER STUDENT
+                        </button>
+                    </div>
 
-            </form>
+                </form>
 
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Face API -->
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 
     <script>
@@ -190,98 +181,87 @@
         }
 
         function startWebcam() {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { 
+            navigator.mediaDevices.getUserMedia({
+                video: {
                     width: { ideal: 640 },
                     height: { ideal: 480 },
                     facingMode: 'user'
-                } 
+                }
             })
-            .then(async function (mediaStream) {
-                stream = mediaStream;
-                video = document.getElementById('videoElement');
-                canvas = document.getElementById('overlayCanvas');
-                ctx = canvas.getContext('2d');
-                
-                video.srcObject = stream;
-                
-                // Wait for video to be ready
-                video.onloadedmetadata = function() {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    canvas.style.width = video.offsetWidth + 'px';
-                    canvas.style.height = video.offsetHeight + 'px';
-                    
-                    // Load face detector and start detection
-                    loadFaceDetector().then(() => {
-                        startFaceDetection();
-                    });
-                };
-                
-                document.getElementById('status').style.display = 'none';
-                document.getElementById('captureBtn').disabled = false;
-                document.getElementById('retryBtn').style.display = 'none';
-            })
-            .catch(function (error) {
-                console.error('Error accessing webcam: ', error);
-                var statusDiv = document.getElementById('status');
-                statusDiv.className = 'status error';
-                statusDiv.textContent = 'Unable to access webcam. Please check permissions.';
-                statusDiv.style.display = 'block';
-            });
+                .then(async function (mediaStream) {
+                    stream = mediaStream;
+                    video = document.getElementById('videoElement');
+                    canvas = document.getElementById('overlayCanvas');
+                    ctx = canvas.getContext('2d');
+
+                    video.srcObject = stream;
+
+                    video.onloadedmetadata = function () {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.style.width = video.offsetWidth + 'px';
+                        canvas.style.height = video.offsetHeight + 'px';
+
+                        loadFaceDetector().then(() => {
+                            startFaceDetection();
+                        });
+                    };
+
+                    document.getElementById('status').style.display = 'none';
+                    document.getElementById('captureBtn').disabled = false;
+                    document.getElementById('retryBtn').style.display = 'none';
+                })
+                .catch(function (error) {
+                    console.error('Error accessing webcam: ', error);
+                    var statusDiv = document.getElementById('status');
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = 'Unable to access webcam. Please check permissions.';
+                    statusDiv.style.display = 'block';
+                });
         }
 
         async function startFaceDetection() {
             if (!modelsLoaded || !video || !canvas || !ctx) return;
-            
+
             detectionInterval = setInterval(async () => {
                 if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
                     try {
                         const detections = await faceapi
                             .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
                             .withFaceLandmarks();
-                        
-                        // Clear canvas
+
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        
-                        // Draw face detections
+
                         if (detections.length > 0) {
                             document.getElementById('faceInfo').style.display = 'block';
                             document.getElementById('faceCount').textContent = detections.length;
-                            
+
                             detections.forEach((detection, index) => {
                                 const box = detection.detection.box;
                                 const x = box.x;
                                 const y = box.y;
                                 const width = box.width;
                                 const height = box.height;
-                                
-                                // Draw green bounding box
+
                                 ctx.strokeStyle = '#00ff00';
                                 ctx.lineWidth = 3;
                                 ctx.strokeRect(x, y, width, height);
-                                
-                                // Draw corner markers
+
                                 const cornerSize = 15;
                                 ctx.fillStyle = '#00ff00';
-                                
-                                // Top-left
+
                                 ctx.fillRect(x - 2, y - 2, cornerSize, 3);
                                 ctx.fillRect(x - 2, y - 2, 3, cornerSize);
-                                
-                                // Top-right
+
                                 ctx.fillRect(x + width - cornerSize + 2, y - 2, cornerSize, 3);
                                 ctx.fillRect(x + width - 1, y - 2, 3, cornerSize);
-                                
-                                // Bottom-left
+
                                 ctx.fillRect(x - 2, y + height - 1, cornerSize, 3);
                                 ctx.fillRect(x - 2, y + height - cornerSize + 2, 3, cornerSize);
-                                
-                                // Bottom-right
+
                                 ctx.fillRect(x + width - cornerSize + 2, y + height - 1, cornerSize, 3);
                                 ctx.fillRect(x + width - 1, y + height - cornerSize + 2, 3, cornerSize);
-                                
-                                // Draw coordinates text
+
                                 ctx.fillStyle = '#00ff00';
                                 ctx.font = 'bold 14px Arial';
                                 ctx.fillText(
@@ -289,10 +269,9 @@
                                     x,
                                     Math.max(y - 10, 15)
                                 );
-                                
-                                // Update coordinates display
+
                                 if (index === 0) {
-                                    document.getElementById('faceCoords').textContent = 
+                                    document.getElementById('faceCoords').textContent =
                                         `X: ${Math.round(x)}, Y: ${Math.round(y)}, W: ${Math.round(width)}, H: ${Math.round(height)}`;
                                 }
                             });
@@ -303,7 +282,7 @@
                         console.error('Face detection error:', error);
                     }
                 }
-            }, 150); // Detect every 150ms for smooth real-time detection
+            }, 150);
         }
 
         function stopFaceDetection() {
@@ -320,39 +299,34 @@
             var video = document.getElementById('videoElement');
             var snapshotCanvas = document.createElement('canvas');
             var context = snapshotCanvas.getContext('2d');
-            
+
             snapshotCanvas.width = video.videoWidth;
             snapshotCanvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
-            
+
             var dataUrl = snapshotCanvas.toDataURL('image/png');
             capturedImageData = dataUrl;
-            
-            // Store in hidden field
+
             document.getElementById('id_captured_image').value = dataUrl;
-            
-            // Update UI
+
             var statusDiv = document.getElementById('status');
             statusDiv.className = 'status success';
             statusDiv.textContent = '✅ Face captured successfully! You can now submit the form.';
             statusDiv.style.display = 'block';
-            
+
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('captureBtn').disabled = true;
             document.getElementById('retryBtn').style.display = 'inline-block';
-            
-            // Stop face detection and webcam
+
             stopFaceDetection();
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
         }
 
-        // Start webcam when page loads
         window.onload = startWebcam;
 
-        // Cleanup on page unload
-        window.onbeforeunload = function() {
+        window.onbeforeunload = function () {
             stopFaceDetection();
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -360,4 +334,5 @@
         };
     </script>
 </body>
+
 </html>
