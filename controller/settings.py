@@ -105,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -134,6 +134,12 @@ DEFAULT_FROM_EMAIL = 'teramediainfo@gmail.com'
 # Department email for attendance notifications
 DEPARTMENT_EMAIL = 'algetss223@gmail.com'
 
-# Attendance closing time (24-hour format)
-# ATTENDANCE_CLOSING_TIME = "13:00"
+from datetime import time
 
+ATTENDANCE_CLOSING_TIME = time(10,0,0) 
+
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+INSTALLED_APPS += ['django_celery_beat']

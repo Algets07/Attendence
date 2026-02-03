@@ -7,6 +7,10 @@ import datetime
 from .models import Student, Attendance
 from .forms import StudentForm
 from .utils import process_face_image_from_base64, recognize_face_and_mark_attendance, get_attendance_stats
+from django.utils.timezone import now
+from django.http import HttpResponse
+from .models import Attendance
+from .utils import generate_professional_attendance_pdf
 
 
 def register_student(request):
@@ -113,27 +117,43 @@ def mark_attendance_api(request):
         }, status=500)
 
 
-
 def attendance_list(request):
-    
-    date = request.GET.get('date')
-    
-    if date:
-        try:
-            date_obj = datetime.strptime(date, '%Y-%m-%d').date()
-        except ValueError:
-            date_obj = None
-    else:
+    date_param = request.GET.get('date')
+
+    try:
+        date_obj = (
+            datetime.datetime.strptime(date_param, '%Y-%m-%d').date()
+            if date_param else None
+        )
+    except ValueError:
         date_obj = None
 
     stats = get_attendance_stats(date_obj)
-    
-    all_students = Student.objects.all()
 
-    attendances = Attendance.objects.filter(date=stats['date']).select_related('student')
+    all_students = Student.objects.filter(is_active=True).order_by(
+        "enrollment_number"
+    )
 
-    present_students = [attendance.student for attendance in attendances if attendance.status == 'Present']
-    absent_students = [student for student in all_students if student not in present_students]
+    attendances = (
+        Attendance.objects
+        .filter(date=stats['date'])
+        .select_related('student')
+        .order_by("student__enrollment_number")
+    )
+
+    present_ids = attendances.filter(
+        status='Present'
+    ).values_list('student_id', flat=True)
+
+    present_students = Student.objects.filter(
+        id__in=present_ids
+    ).order_by("enrollment_number")
+
+    absent_students = Student.objects.filter(
+        is_active=True
+    ).exclude(
+        id__in=present_ids
+    ).order_by("enrollment_number")
 
     context = {
         'attendances': attendances,
@@ -145,9 +165,18 @@ def attendance_list(request):
     return render(request, 'attendance_list.html', context)
 
 
-
+from app.utils import get_attendance_stats, is_attendance_closed
+from django.conf import settings
 def home(request):
-    return render(request, "home.html")
+    stats = get_attendance_stats()
+    attendance_closed = is_attendance_closed()
+
+    return render(request, "home.html", {
+        "stats": stats,
+        "attendance_closed": attendance_closed,
+        "closing_time": settings.ATTENDANCE_CLOSING_TIME
+    })
+
 
 @require_http_methods(["POST"])
 def mark_absent_today_api(request):
@@ -196,3 +225,123 @@ def send_daily_report_api(request):
     from .utils import send_daily_attendance_report
     send_daily_attendance_report()
     return JsonResponse({"success": True, "message": "Daily report sent"})
+
+
+def download_daily_report(request):
+    date = now().date()
+
+    students = Student.objects.filter(is_active=True).order_by(
+        "enrollment_number"
+    )
+
+    attendance_map = {
+        a.student_id: a.status
+        for a in Attendance.objects.filter(date=date)
+    }
+
+    table_data = [
+        ["Enrollment No", "Student Name", "Status"]
+    ]
+
+    for student in students:
+        status = attendance_map.get(student.id, "Absent")
+
+        table_data.append([
+            student.enrollment_number,
+            student.name,
+            status
+        ])
+
+    pdf = generate_professional_attendance_pdf(
+        title="Daily Attendance Report",
+        subtitle=f"Date: {date.strftime('%d %B %Y')}",
+        table_data=table_data
+    )
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="daily_report_{date}.pdf"'
+    )
+    return response
+
+from calendar import monthrange
+
+
+def download_monthly_summary_report(request, year, month):
+    total_days = monthrange(year, month)[1]
+
+    students = Student.objects.filter(
+        is_active=True
+    ).order_by("enrollment_number")
+
+    table_data = [
+        ["Enrollment No", "Student Name", "Present Days", "Absent Days"]
+    ]
+
+    for student in students:
+        present_days = Attendance.objects.filter(
+            student=student,
+            date__year=year,
+            date__month=month,
+            status="Present"
+        ).count()
+
+        absent_days = total_days - present_days
+
+        table_data.append([
+            student.enrollment_number,
+            student.name,
+            present_days,
+            absent_days
+        ])
+
+    pdf = generate_professional_attendance_pdf(
+        title="Monthly Attendance Summary Report",
+        subtitle=f"Month: {month} / {year}",
+        table_data=table_data
+    )
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="monthly_attendance_{month}_{year}.pdf"'
+    )
+    return response
+
+from datetime import date as date_class
+
+def download_datewise_report(request, year, month, day):
+    selected_date = date_class(year, month, day)
+
+    students = Student.objects.filter(
+        is_active=True
+    ).order_by("enrollment_number")
+
+    attendance_map = {
+        a.student_id: a.status
+        for a in Attendance.objects.filter(date=selected_date)
+    }
+
+    table_data = [
+        ["Enrollment No", "Student Name", "Status"]
+    ]
+
+    for student in students:
+        status = attendance_map.get(student.id, "Absent")
+
+        table_data.append([
+            student.enrollment_number,
+            student.name,
+            status
+        ])
+
+    pdf = generate_professional_attendance_pdf(
+        title="Daily Attendance Report",
+        subtitle=f"Date: {selected_date.strftime('%d %B %Y')}",
+        table_data=table_data
+    )
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="daily_report_{selected_date}.pdf"'
+    )
+    return response
