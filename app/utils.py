@@ -7,6 +7,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib import colors
+from reportlab.platypus import (SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer)
 import io
 from PIL import Image
 import io
@@ -371,9 +372,6 @@ def is_attendance_closed():
         print('hi sent')
         close_attendance_and_send_report()
     return current_time >= settings.ATTENDANCE_CLOSING_TIME
-from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
-)
 
 def generate_professional_attendance_pdf(
     title,
